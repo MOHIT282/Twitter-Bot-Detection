@@ -40,3 +40,15 @@ def main():
 # Run the main function
 
 main()
+# import streamlit as st
+# import time
+
+# def run_animation():
+#     st.title("Animating Content")
+
+#     for i in range(5):  # Change the range based on the number of frames you want
+#         st.write(f"Frame {i + 1}")
+#         time.sleep(1)  # Adjust the sleep duration based on your desired animation speed
+
+# # Run the animation function
+# run_animation()

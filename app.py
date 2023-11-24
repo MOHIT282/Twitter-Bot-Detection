@@ -3,58 +3,14 @@ import streamlit_lottie as st_lottie
 import json
 import pickle
 import pandas as pd
-import numpy as np
 import time
-import base64
 from wordcloud import WordCloud
 from customClass import CustomLinguisticFeatureTransformer
 from phrases import common_words
 import matplotlib.pyplot as plt
 import Database 
 
-st.set_page_config(page_title='Bot-Buster',page_icon='icon.png')
-
-# from PIL import Image
-# import base64
-# from pathlib import Path
-
-# # Function to load an image
-# def load_image(image_file):
-#     img = Image.open(image_file)
-#     return img
-
-# # Function to convert image to base64 (for CSS embedding)
-# def img_to_bytes(img_path):
-#     img_bytes = Path(img_path).read_bytes()
-#     encoded = base64.b64encode(img_bytes).decode()
-#     return encoded
-
-# # Function to set a background image
-# def set_bg_image(image_file):
-#     # Convert the image to base64 and display it using CSS
-#     bin_str = img_to_bytes(image_file)
-#     page_bg_img = f'''
-#     <style>
-#     .stApp {{
-#         background-image: url("data:image/png;base64,{bin_str}");
-#         background-size: cover;
-#     }}
-#     </style>
-#     '''
-#     st.markdown(page_bg_img, unsafe_allow_html=True)
-
-# # Main function to run the app
-# def main():
-#     # Set the background image (replace 'path_to_your_image.jpg' with your image file)
-#     set_bg_image("background.jpg")
-
-#     # Example content
-#     st.title("Welcome to My Streamlit App")
-#     st.write("This is an example of Streamlit with a background image.")
-
-# # Run the main function
-
-# main()
+st.set_page_config(page_title='Bot-Buster',page_icon='./images/icon.png')
 
 #load the animation on the main page
 def load_lottiefile(filepath):
@@ -67,7 +23,7 @@ def display_animation(animation):
     
     st_lottie.st_lottie(
         animation,
-        speed = 0.75,
+        speed = 1,
         loop = True,
         quality = 'high',
         height = 450,
@@ -131,7 +87,7 @@ def predict(username):
     
     # tweet_file = pd.read_csv(f'./datasets/cleaned_data/{username}.csv')
     tweet_file = Database.fetchTweets(username)
-    model = pickle.load(open('custom1_pipe_model.pkl','rb'))
+    model = pickle.load(open('./models/custom1_pipe_model.pkl','rb'))
     tweets = tweet_file['Tweets']
     tweets = tweets.astype('str')
     output = model.predict(tweets)
@@ -193,11 +149,13 @@ def showData(row):
         # print(danger_value)
         st.warning('This Account may have supspicious activities', icon='⚠️')
     
+    st.write('---')
     st.write(f"### Common words used by {username}")
     display_words()
     df = Database.fetchTweets(username)
     # print('data reaching at streamlit to load-->',df)------
     if df is not None:
+        st.write('---')
         st.write(f"### Recent tweets from {username}")
         st.dataframe(data=df[['Tweets','Likes','Comments','Retweets','Tweet_Url']])
 
@@ -217,35 +175,36 @@ def display_window():
     Outputs:
     - None
     """
-    if username != "":
-    
-        df = pd.read_csv('data.csv') # reading the dataset
-        progress_text = f"#### Fetching tweets of {username} from the dataset. Please wait."
-        my_bar = st.progress(0, text=progress_text)
+    # df = pd.read_csv('data.csv') # reading the dataset
+    progress_text = f"#### Fetching tweets of {username} from the dataset. Please wait."
+    my_bar = st.progress(0, text=progress_text)
 
-        for percent_complete in range(100):
-            time.sleep(0.05)
-            my_bar.progress(percent_complete + 1, text=progress_text)
-        time.sleep(1)
-        my_bar.empty()
+    for percent_complete in range(100):
+        time.sleep(0.05)
+        my_bar.progress(percent_complete + 1, text=progress_text)
+    time.sleep(1)
+    my_bar.empty()
+     
+    # row = df[df.UserId == username] # finding the username
+    row = Database.FetchData(username)
+    # print(row)
         
-        # row = df[df.UserId == username] # finding the username
-        row = Database.FetchData(username)
-        # print(row)
-        
-        if(row is not None):
-            showData(row)
-        else:
-            st.error('## Invalid username or no details found in the fetched data.\n ## Please recheck the entered Twitter Handle or hashtag')
-
-    
+    if(row is not None):
+        showData(row)
     else:
-        st.write('This is a Twitter Bot account Detection Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like common words, phrases and sentences etc.')
-        
-        animation = load_lottiefile("animation.json")
-        display_animation(animation)
-        
-    
+        st.error('## Invalid username or no details found in the fetched data.\n ## Please recheck the enteredTwitter Handle or hashtag')
+
+def Analyze_data(dataset):
+    with st.form("my_form"):
+        st.write("Inside the form")
+        slider_val = st.slider("Form slider")
+        checkbox_val = st.checkbox("Form checkbox")
+
+        # Every form must have a submit button.
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            st.write("slider", slider_val, "checkbox", checkbox_val)
+
 
 # Add CSS for the border
     # st.markdown(
@@ -306,8 +265,10 @@ def display_window():
 
 # code for slider component
 # st.title("BOT-BUSTER")
-heading, logo = st.columns([1,1])
+__,logo, heading,_ = st.columns([1,0.5,2,1])
 
+with logo:
+    st.image('./images/icon.png', width=70)
 with heading:
     st.title('BOT-BUSTER')
 
@@ -315,12 +276,26 @@ with heading:
 #     st.image('logo-hd.png', width=200)
 st.sidebar.write("# Enter the Credentials here...")
 username = st.sidebar.text_input(label='Enter the **Twitter Handle**...', placeholder='For eg. elonmusk')
-st.sidebar.write('# OR')
-hashtag = st.sidebar.text_input(label='Enter the **Hashtag**...', placeholder='For eg. #WorldCup2k23',disabled=True)
+# st.sidebar.write('# OR')
+# hashtag = st.sidebar.text_input(label='Enter the **Hashtag**...', placeholder='For eg. #WorldCup2k23',disabled=True)
 
 st.sidebar.button('Analyze Tweets', type='secondary')
+st.sidebar.write('---')
+# file = st.sidebar.file_uploader('Make Sure your file sholud be in csv file and must have columns named as')
+st.sidebar.write('# Analyze your own data ?')
+st.sidebar.button('Analyze own tweets', on_click={})
 
-display_window()
 
 
+def run():
     
+    if(username != ""):
+        display_window()
+    
+    else:
+        st.write('This is a Twitter Bot account Detection Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like common words, phrases and sentences etc.')
+        
+        animation = load_lottiefile("./animations/animation4.json")
+        display_animation(animation)
+
+run()
