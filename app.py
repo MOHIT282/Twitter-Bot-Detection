@@ -12,6 +12,11 @@ import Database
 
 st.set_page_config(page_title='Bot-Buster',page_icon='./images/icon.png')
 
+#creating a session state username which can retain its value even after re-rendering
+if ['username','btn'] not in st.session_state:
+    st.session_state.username = ""
+    st.session_state.btn = ""
+
 #load the animation on the main page
 def load_lottiefile(filepath):
     with open(filepath,"r") as f:
@@ -30,6 +35,10 @@ def display_animation(animation):
         width = None,
         key = None,
     )
+    
+def clear_username():
+    st.session_state.username = ""
+    st.session_state.btn = ""
 
 def display_words():
     """
@@ -54,7 +63,7 @@ def display_words():
     Outputs:
     - None
     """
-    df = pd.read_csv(f'./datasets/cleaned_data/{username}.csv')
+    df = pd.read_csv(f'./datasets/cleaned_data/{st.session_state.username}.csv')
     tweets_list = []
 
     df['Tweets'] = df['Tweets'].astype('str')
@@ -112,17 +121,17 @@ def showData(row):
             time.sleep(1)
         st.write("")
         
-    col1, col2 = st.columns([3,6],gap='large')
+    col1, col2 = st.columns([1,1.5],gap='large')
     global danger_value
     danger_value = None
     
     with col1:
         st.image(row.iloc[0, -1],width=300, use_column_width=True)
         st.subheader(f'{row.iloc[0, 0]}')
-        st.write(f'Twitter Handle : {row.iloc[0,1]}')
-        st.write(f"Followers : {row.iloc[0, 2]}")
-        st.write(f'Verified : {row.iloc[0, -3]}')
-        st.write(f'Joined Twitter: {row.iloc[0, 4]}')
+        st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' id='my-link'>{row.iloc[0,1][1:]}</a>", unsafe_allow_html=True)
+        st.write(f"Followers : :blue[{row.iloc[0, 2]}]")
+        st.write(f'Verified : :blue[{row.iloc[0, -3]}]')
+        st.write(f'Joined Twitter : :blue[{row.iloc[0, 4]}]')
             
     with col2:
         with st.status("Analyzing Tweets...", expanded=True) as status:
@@ -136,7 +145,7 @@ def showData(row):
             time.sleep(2)
             status.update(label="Displaying the Prediction!", state="complete", expanded=False)
 
-        output = predict(username)
+        output = predict(st.session_state.username)
             
         zeros = output.count(0)
         ones = output.count(1)
@@ -150,13 +159,13 @@ def showData(row):
         st.warning('This Account may have supspicious activities', icon='⚠️')
     
     st.write('---')
-    st.write(f"### Common words used by {username}")
+    st.write(f"### Common words used by :blue[{st.session_state.username}]")
     display_words()
-    df = Database.fetchTweets(username)
+    df = Database.fetchTweets(st.session_state.username)
     # print('data reaching at streamlit to load-->',df)------
     if df is not None:
         st.write('---')
-        st.write(f"### Recent tweets from {username}")
+        st.write(f"### Recent tweets from :blue[{st.session_state.username}]")
         st.dataframe(data=df[['Tweets','Likes','Comments','Retweets','Tweet_Url']])
 
 
@@ -175,8 +184,10 @@ def display_window():
     Outputs:
     - None
     """
+
     # df = pd.read_csv('data.csv') # reading the dataset
-    progress_text = f"#### Fetching tweets of {username} from the dataset. Please wait."
+    # st.markdown("Text can be :blue[blue], but also :orange[orange]. And of course it can be :red[red]. And :green[green].")
+    progress_text = f"#### Fetching tweets of :orange[{st.session_state.username}] from the dataset. Please wait..."
     my_bar = st.progress(0, text=progress_text)
 
     for percent_complete in range(100):
@@ -186,116 +197,70 @@ def display_window():
     my_bar.empty()
      
     # row = df[df.UserId == username] # finding the username
-    row = Database.FetchData(username)
+    row = Database.FetchData(st.session_state.username)
     # print(row)
         
     if(row is not None):
         showData(row)
     else:
-        st.error('## Invalid username or no details found in the fetched data.\n ## Please recheck the enteredTwitter Handle or hashtag')
+        st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle] or hashtag')
 
-def Analyze_data(dataset):
-    with st.form("my_form"):
-        st.write("Inside the form")
-        slider_val = st.slider("Form slider")
-        checkbox_val = st.checkbox("Form checkbox")
+# def Analyze_data(dataset):
+#     with st.form("my_form"):
+#         st.write("Inside the form")
+#         slider_val = st.slider("Form slider")
+#         checkbox_val = st.checkbox("Form checkbox")
 
-        # Every form must have a submit button.
-        submitted = st.form_submit_button("Submit")
-        if submitted:
-            st.write("slider", slider_val, "checkbox", checkbox_val)
+#         # Every form must have a submit button.
+#         submitted = st.form_submit_button("Submit")
+#         if submitted:
+#             st.write("slider", slider_val, "checkbox", checkbox_val)
 
-
-# Add CSS for the border
-    # st.markdown(
-    #     """
-    #     <style>
-    #     .with-border {
-    #         border: 4px solid #8B4513; /* Brown border color */
-    #         padding: 10px;
-    #         border-radius: 10px; /* Optional: Add rounded corners */
-    #     }
-    #     </style>
-    #     """,
-    #     unsafe_allow_html=True
-    # )
-
-    # # Create columns
-    # col1, col2 = st.columns([1, 4])
-
-    # # Display image with a border in the first column
-    # with col1:
-    #     st.markdown(
-    #         '<div class="with-border"><img src="https://pbs.twimg.com/profile_images/1562753500726976514/EPSUNyR3_400x400.jpg" width="400"></div>',
-    #         unsafe_allow_html=True
-    #     )
-
-    # # Display text with a border in the second column
-    # with col2:
-    #     st.markdown(
-    #         '<div class="with-border"><h2>Virat Kohli</h2></div>',
-    #         unsafe_allow_html=True
-    #     )
-
-
-# st.sidebar.markdown(
-#     """
-#     <style>
-#     .sidebar .center {
-#         width: 150px;
-#         display: flex;
-#         justify-content : center;
-#         align-items : center;
-#         height: 100px; /* Adjust height as needed */
-#     }
+def analyze_user_data(file):
     
-#     .center button{
-#         color : aqua;
-#         background-color: transparent;
-#         border : 2px solid black;
-#         border-radius : 8px;
-#     }
+    df = pd.read_csv(file)
     
-#     </style>
-#     """,
-#     unsafe_allow_html=True
-# ) 
+    if not all(col in df.columns for col in ['UserId','Tweets','Likes','Retweets','Comments','Tweet_Url']):
+        st.error("#### csv file must have the following columns :orange[UserId, Tweets, Likes, Retweets, Comments, Tweet_Url]")
+    else:
+        st.header('Your data will be evaluated here')
+        st.dataframe(df)
     
-# st.sidebar.markdown('<div class="center sidebar"><button>Centered Button</button></div>', unsafe_allow_html=True)
+    
 
-# code for slider component
-# st.title("BOT-BUSTER")
 __,logo, heading,_ = st.columns([1,0.5,2,1])
 
 with logo:
-    st.image('./images/icon.png', width=70)
+    st.image('./images/icon.png', width=65)
 with heading:
-    st.title('BOT-BUSTER')
+    # st.title(':blue[BOT-BUSTER]')
+    st.image('./images/canva-logo.png', width=360)
 
-# with logo:
-#     st.image('logo-hd.png', width=200)
-st.sidebar.write("# Enter the Credentials here...")
-username = st.sidebar.text_input(label='Enter the **Twitter Handle**...', placeholder='For eg. elonmusk')
+st.sidebar.write("# :orange[Enter Credentials here...]")
+st.sidebar.text_input(label='Enter the :blue[**Twitter Handle**...]', placeholder='For eg. elonmusk',key='username')
 # st.sidebar.write('# OR')
 # hashtag = st.sidebar.text_input(label='Enter the **Hashtag**...', placeholder='For eg. #WorldCup2k23',disabled=True)
 
-st.sidebar.button('Analyze Tweets', type='secondary')
+tweet_button = st.sidebar.button('Analyze Tweets', type='secondary')
 st.sidebar.write('---')
 # file = st.sidebar.file_uploader('Make Sure your file sholud be in csv file and must have columns named as')
-st.sidebar.write('# Analyze your own data ?')
-st.sidebar.button('Analyze own tweets', on_click={})
-
-
+st.sidebar.write('# :orange[Analyze data]')
+st.session_state.btn = st.sidebar.file_uploader('Make Predictions on your :blue[**own dataset**?]', type=['csv'])
+# st.session_state.btn = st.sidebar.button('Load your dataset')
 
 def run():
-    
-    if(username != ""):
+    if st.session_state.username != "" and tweet_button:
+        st.sidebar.button('Back to Home', on_click=clear_username)
         display_window()
     
-    else:
-        st.write('This is a Twitter Bot account Detection Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like common words, phrases and sentences etc.')
+    elif st.session_state.btn:
+        st.sidebar.button('Back to Home',type='secondary', on_click=clear_username)
+        analyze_user_data(st.session_state.btn)
         
+    else:
+        st.write('##### This is a :orange[Twitter Bot account Detection] Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like :orange[common words, phrases] and :orange[sentences] etc.')
         animation = load_lottiefile("./animations/animation4.json")
         display_animation(animation)
-
+        
 run()
+# st.write(st.session_state)
