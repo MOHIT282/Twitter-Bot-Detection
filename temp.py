@@ -122,9 +122,16 @@
 
 import streamlit as st 
 
-file = st.file_uploader('Upload your file here ', type='csv')
+def toggle_form():
+    st.session_state['form_open'] = False
 
-if file is not None:
-    st.write('hello')
+if 'form_open' not in st.session_state:
+    st.session_state['form_open'] = True
 
-st.button('okay')
+# st.session_state.form_open = True
+with st.expander(label='User Form',expanded=st.session_state.form_open):
+    name = st.text_input('Enter the value here')
+    check = st.checkbox("Is user verified")
+    
+button = st.button('submit', on_click=toggle_form)
+    

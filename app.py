@@ -9,13 +9,30 @@ from customClass import CustomLinguisticFeatureTransformer
 from phrases import common_words
 import matplotlib.pyplot as plt
 import Database 
+import cleaning
 
 st.set_page_config(page_title='Bot-Buster',page_icon='./images/icon.png')
 
 #creating a session state username which can retain its value even after re-rendering
-if ['username','btn'] not in st.session_state:
+if 'username' not in st.session_state:
     st.session_state.username = ""
-    st.session_state.btn = ""
+
+if 'form_expand' not in st.session_state:
+    st.session_state.form_expand = True
+
+def close_form():
+    st.session_state.form_expand = False
+
+def show_results(danger_value):
+    if(danger_value > 10 and danger_value < 50):
+            # print(danger_value)
+            st.warning(' This Account may have supspicious activities', icon='⚠️')
+                
+    elif(danger_value < 10):
+        st.error(' High chances of a bot account', icon='⛔')
+                    
+    elif(danger_value > 50):
+        st.success(icon='✅',body=' The twitter account doesn\'t appers to be a bot account')
 
 #load the animation on the main page
 def load_lottiefile(filepath):
@@ -40,7 +57,7 @@ def clear_username():
     st.session_state.username = ""
     st.session_state.btn = ""
 
-def display_words():
+def display_words(df):
     """
     Generates a word cloud visualization based on the common words used in a user's tweets.
 
@@ -63,7 +80,7 @@ def display_words():
     Outputs:
     - None
     """
-    df = pd.read_csv(f'./datasets/cleaned_data/{st.session_state.username}.csv')
+    # df = pd.read_csv(f'./datasets/cleaned_data/{st.session_state.username}.csv')
     tweets_list = []
 
     df['Tweets'] = df['Tweets'].astype('str')
@@ -83,7 +100,7 @@ def display_words():
 
 
 # Prediction function which usees the model to make predictions
-def predict(username):
+def predict(tweet_file):
     """
     Predicts whether the tweets associated with a given username are from a human or a bot account.
     
@@ -93,15 +110,35 @@ def predict(username):
     Returns:
         list: A list of predictions, where each prediction is either 0 (human) or 1 (bot).
     """
-    
+    with st.status("Analyzing Tweets...", expanded=True) as status:
+        st.write("Cleaning the data...")
+        time.sleep(4)
+        st.write("Feeding tweets to the model...")
+        time.sleep(2)
+        st.write("Waiting for the response...")
+        time.sleep(4)
+        st.write("Prediction made Successfully...")
+        time.sleep(2)
+        status.update(label="Displaying the Prediction!", state="complete", expanded=False)
+
+            
     # tweet_file = pd.read_csv(f'./datasets/cleaned_data/{username}.csv')
-    tweet_file = Database.fetchTweets(username)
     model = pickle.load(open('./models/custom1_pipe_model.pkl','rb'))
     tweets = tweet_file['Tweets']
     tweets = tweets.astype('str')
-    output = model.predict(tweets)
+    prediction = model.predict(tweets)
     
-    return output.tolist()
+    output = prediction.tolist()
+    
+    zeros = output.count(0)
+    ones = output.count(1)
+    danger_value = zeros - ones
+        
+    st.write("## Predictions   ")
+    chart_data = pd.DataFrame([[zeros,ones]], columns=["Human", "Bot"])
+    st.bar_chart(chart_data, use_container_width=True)
+    
+    return danger_value
 
 
 # if the UserId matches with the UserIds in the dataset, this function will run
@@ -127,40 +164,23 @@ def showData(row):
     
     with col1:
         st.image(row.iloc[0, -1],width=300, use_column_width=True)
-        st.subheader(f'{row.iloc[0, 0]}')
-        st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' id='my-link'>{row.iloc[0,1][1:]}</a>", unsafe_allow_html=True)
-        st.write(f"Followers : :blue[{row.iloc[0, 2]}]")
-        st.write(f'Verified : :blue[{row.iloc[0, -3]}]')
-        st.write(f'Joined Twitter : :blue[{row.iloc[0, 4]}]')
+        with st.expander(label=f'{row.iloc[0, 0]}', expanded=True):
+            st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' id='my-link'>{row.iloc[0,1][1:]}</a>", unsafe_allow_html=True)
+            st.write(f"Followers : :blue[{row.iloc[0, 2]}]")
+            st.write(f'Verified : :blue[{row.iloc[0, -3]}]')
+            st.write(f'Joined Twitter : :blue[{row.iloc[0, 4]}]')
             
     with col2:
-        with st.status("Analyzing Tweets...", expanded=True) as status:
-            st.write("Cleaning the data...")
-            time.sleep(4)
-            st.write("Feeding tweets to the model...")
-            time.sleep(2)
-            st.write("Waiting for the response...")
-            time.sleep(4)
-            st.write("Prediction made Successfully...")
-            time.sleep(2)
-            status.update(label="Displaying the Prediction!", state="complete", expanded=False)
-
-        output = predict(st.session_state.username)
-            
-        zeros = output.count(0)
-        ones = output.count(1)
-        danger_value = zeros - ones
-        st.write("## Predictions   ")
-        chart_data = pd.DataFrame([[zeros,ones]], columns=["Human", "Bot"])
-        st.bar_chart(chart_data, use_container_width=True)
+        tweet_file = Database.fetchTweets(st.session_state.username)
+        danger_value = predict(tweet_file)
         
-    if(danger_value is not None and danger_value < 10):
-        # print(danger_value)
-        st.warning('This Account may have supspicious activities', icon='⚠️')
+    show_results(danger_value)
     
     st.write('---')
     st.write(f"### Common words used by :blue[{st.session_state.username}]")
-    display_words()
+    dataset = Database.fetchTweets(st.session_state.username)
+    display_words(dataset)
+    
     df = Database.fetchTweets(st.session_state.username)
     # print('data reaching at streamlit to load-->',df)------
     if df is not None:
@@ -205,26 +225,46 @@ def display_window():
     else:
         st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle] or hashtag')
 
-# def Analyze_data(dataset):
-#     with st.form("my_form"):
-#         st.write("Inside the form")
-#         slider_val = st.slider("Form slider")
-#         checkbox_val = st.checkbox("Form checkbox")
-
-#         # Every form must have a submit button.
-#         submitted = st.form_submit_button("Submit")
-#         if submitted:
-#             st.write("slider", slider_val, "checkbox", checkbox_val)
-
 def analyze_user_data(file):
     
-    df = pd.read_csv(file)
-    
-    if not all(col in df.columns for col in ['UserId','Tweets','Likes','Retweets','Comments','Tweet_Url']):
-        st.error("#### csv file must have the following columns :orange[UserId, Tweets, Likes, Retweets, Comments, Tweet_Url]")
+    temp_df = pd.read_csv(file)
+    if not all(col in temp_df.columns for col in ['UserId','Tweets','Likes','Retweets','Comments','Tweet_Url']):
+            st.error("#### csv file must have the following columns :orange[UserId, Tweets, Likes, Retweets, Comments, Tweet_Url]")
     else:
-        st.header('Your data will be evaluated here')
-        st.dataframe(df)
+        button = None
+        form_complete = False
+        with st.expander(label="### :orange[User Form]",expanded=st.session_state.form_expand):
+            
+            col1, col2 = st.columns([1,1])
+            with col1:
+                name = st.text_input('Twitter Handle of the User')
+                Following = st.number_input('Twitter Following',help='Enter the no. of followings', min_value=0)
+            
+            with col2:
+                followers = st.number_input('No. of followers',min_value=0)
+                verified = st.radio('Verified on Twitter',['Yes','No'], horizontal=True)
+            
+            form_complete = name and Following and followers and verified
+            
+            if(form_complete):
+                button = st.button('Submit Now', on_click=close_form)
+        
+        if button and form_complete :
+        
+            df = temp_df.copy()
+            # df = cleaning.cleanFile(df)
+            # st.write(file)
+            st.header('Your data will be evaluated here')
+            danger_value = predict(df)
+                
+            show_results(danger_value)
+                
+            st.write(':red[Note:] The predictions accuracy is based on how clean and formated the tweets are')
+                    
+            st.write('---')
+            display_words(df)
+            st.write('---')
+            df = st.dataframe(df[['Tweets','Likes','Comments','Retweets','Tweet_Url']])
     
     
 
@@ -245,17 +285,22 @@ tweet_button = st.sidebar.button('Analyze Tweets', type='secondary')
 st.sidebar.write('---')
 # file = st.sidebar.file_uploader('Make Sure your file sholud be in csv file and must have columns named as')
 st.sidebar.write('# :orange[Analyze data]')
-st.session_state.btn = st.sidebar.file_uploader('Make Predictions on your :blue[**own dataset**?]', type=['csv'])
+file = st.sidebar.file_uploader('Make Predictions on your :blue[**own dataset**?]', type=['csv'])
 # st.session_state.btn = st.sidebar.button('Load your dataset')
 
 def run():
-    if st.session_state.username != "" and tweet_button:
-        st.sidebar.button('Back to Home', on_click=clear_username)
-        display_window()
+    if st.session_state.username != "":
+        if tweet_button:
+            st.sidebar.button('Back to Home', on_click=clear_username)
+            display_window()
+        else:
+            st.write('##### This is a :orange[Twitter Bot account Detection] Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like :orange[common words, phrases] and :orange[sentences] etc.')
+            animation = load_lottiefile("./animations/animation4.json")
+            display_animation(animation)   
     
-    elif st.session_state.btn:
-        st.sidebar.button('Back to Home',type='secondary', on_click=clear_username)
-        analyze_user_data(st.session_state.btn)
+    elif file:
+        # st.sidebar.button('Back to Home',type='secondary', on_click=clear_username)
+        analyze_user_data(file)
         
     else:
         st.write('##### This is a :orange[Twitter Bot account Detection] Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like :orange[common words, phrases] and :orange[sentences] etc.')
