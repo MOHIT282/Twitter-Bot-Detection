@@ -24,12 +24,30 @@ def close_form():
     st.session_state.form_expand = False
 
 def show_results(danger_value):
+    """
+    Display the results of the prediction made about whether a Twitter account is a bot or not.
+
+    Args:
+        danger_value (int): The danger value calculated for the Twitter account.
+
+    Returns:
+        None
+
+    Summary:
+        The `show_results` function is responsible for displaying the results of the prediction made about whether a Twitter account is a bot or not. It provides different messages and icons based on the danger value calculated.
+
+    Flow:
+        1. If the danger value is between 10 and 50, a warning message with an exclamation icon is displayed, indicating that the account may have suspicious activities.
+        2. If the danger value is less than 10, an error message with a stop sign icon is displayed, indicating that the account has a high chance of being a bot. A link to report the account is also provided.
+        3. If the danger value is greater than 50, a success message with a checkmark icon is displayed, indicating that the account does not appear to be a bot.
+    """
     if(danger_value > 10 and danger_value < 50):
-            # print(danger_value)
-            st.warning(' This Account may have supspicious activities', icon='⚠️')
+        # print(danger_value)
+        st.warning(' This Account may have supspicious activities', icon='⚠️')
                 
     elif(danger_value < 10):
-        st.error(' High chances of a bot account', icon='⛔')
+        st.error('The twitter account has high chances to be a bot account', icon='⛔')
+        st.write(":red[You can report this account here] : <a href='https://help.twitter.com/en/rules-and-policies/x-report-violation' style='text-decoration: none;'>Twitter Help</a>", unsafe_allow_html=True)
                     
     elif(danger_value > 50):
         st.success(icon='✅',body=' The twitter account doesn\'t appers to be a bot account')
@@ -42,15 +60,23 @@ def load_lottiefile(filepath):
 
 # displaying animation to the main window
 def display_animation(animation):
-    
+    """
+    Display an animation using the `st_lottie` library in Streamlit.
+
+    Parameters:
+    animation (JSON): The animation file to be displayed.
+
+    Returns:
+    None. The function only displays the animation on the Streamlit app.
+    """
     st_lottie.st_lottie(
         animation,
-        speed = 1,
-        loop = True,
-        quality = 'high',
-        height = 450,
-        width = None,
-        key = None,
+        speed=1,
+        loop=True,
+        quality='high',
+        height=450,
+        width=None,
+        key=None
     )
     
 def clear_username():
@@ -96,7 +122,6 @@ def display_words(df):
     ax.imshow(wordcloud)
     plt.axis("off")
     st.pyplot(fig, use_container_width=True)
-
 
 
 # Prediction function which usees the model to make predictions
@@ -164,8 +189,8 @@ def showData(row):
     
     with col1:
         st.image(row.iloc[0, -1],width=300, use_column_width=True)
-        with st.expander(label=f'{row.iloc[0, 0]}', expanded=True):
-            st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' id='my-link'>{row.iloc[0,1][1:]}</a>", unsafe_allow_html=True)
+        with st.expander(label=f':orange[{row.iloc[0, 0]}]', expanded=True):
+            st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' style='text-decoration: none;'>{row.iloc[0,1][1:]}</a>", unsafe_allow_html=True)
             st.write(f"Followers : :blue[{row.iloc[0, 2]}]")
             st.write(f'Verified : :blue[{row.iloc[0, -3]}]')
             st.write(f'Joined Twitter : :blue[{row.iloc[0, 4]}]')
@@ -207,7 +232,7 @@ def display_window():
 
     # df = pd.read_csv('data.csv') # reading the dataset
     # st.markdown("Text can be :blue[blue], but also :orange[orange]. And of course it can be :red[red]. And :green[green].")
-    progress_text = f"#### Fetching tweets of :orange[{st.session_state.username}] from the dataset. Please wait..."
+    progress_text = f"#### Looking for Twitter handle :orange[{st.session_state.username}] in the dataset. Please wait..."
     my_bar = st.progress(0, text=progress_text)
 
     for percent_complete in range(100):
@@ -223,38 +248,57 @@ def display_window():
     if(row is not None):
         showData(row)
     else:
-        st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle] or hashtag')
+        st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle]')
 
 def analyze_user_data(file):
+    """
+    Analyzes user data from a CSV file and displays various details about the user.
     
+    Args:
+        file (str): The path to the CSV file containing user data.
+        
+    Returns:
+        None
+    """
     temp_df = pd.read_csv(file)
+    print(temp_df)
     if not all(col in temp_df.columns for col in ['UserId','Tweets','Likes','Retweets','Comments','Tweet_Url']):
             st.error("#### csv file must have the following columns :orange[UserId, Tweets, Likes, Retweets, Comments, Tweet_Url]")
     else:
         button = None
         form_complete = False
-        with st.expander(label="### :orange[User Form]",expanded=st.session_state.form_expand):
+        with st.expander(label="### :orange[Enter User Details]",expanded=st.session_state.form_expand):
             
             col1, col2 = st.columns([1,1])
             with col1:
-                name = st.text_input('Twitter Handle of the User')
+                name = st.text_input('Twitter Handle of the User',value=temp_df.UserId[0][1:])
                 Following = st.number_input('Twitter Following',help='Enter the no. of followings', min_value=0)
             
             with col2:
-                followers = st.number_input('No. of followers',min_value=0)
+                followers = st.number_input('Number of Twitter followers',min_value=0)
                 verified = st.radio('Verified on Twitter',['Yes','No'], horizontal=True)
-            
-            form_complete = name and Following and followers and verified
+                
+            form_complete = name and verified
             
             if(form_complete):
                 button = st.button('Submit Now', on_click=close_form)
         
         if button and form_complete :
         
+            col1, col2 = st.columns([1,1])
+            
+            with col1:
+                st.write(f"#### Twitter Handle : <a href='https://www.twitter.com/{name}' style='text-decoration: none;' id='my-link'>{name}</a>", unsafe_allow_html=True)
+                st.write(f'#### Following : :blue[{Following}]')
+            
+            with col2:
+                st.write(f'#### Followers : :blue[{followers}]')
+                st.write(f'#### Verified : :blue[{verified}]')
+        
             df = temp_df.copy()
-            # df = cleaning.cleanFile(df)
+            df = cleaning.clean(df)
             # st.write(file)
-            st.header('Your data will be evaluated here')
+            # st.header('Your data will be evaluated here')
             danger_value = predict(df)
                 
             show_results(danger_value)
@@ -262,11 +306,12 @@ def analyze_user_data(file):
             st.write(':red[Note:] The predictions accuracy is based on how clean and formated the tweets are')
                     
             st.write('---')
+            st.write(f'### Common words used by :blue[{name}]')
             display_words(df)
             st.write('---')
+            st.write(f'### Recent Tweets of :blue[{name}]')
             df = st.dataframe(df[['Tweets','Likes','Comments','Retweets','Tweet_Url']])
-    
-    
+
 
 __,logo, heading,_ = st.columns([1,0.5,2,1])
 
@@ -278,25 +323,18 @@ with heading:
 
 st.sidebar.write("# :orange[Enter Credentials here...]")
 st.sidebar.text_input(label='Enter the :blue[**Twitter Handle**...]', placeholder='For eg. elonmusk',key='username')
-# st.sidebar.write('# OR')
-# hashtag = st.sidebar.text_input(label='Enter the **Hashtag**...', placeholder='For eg. #WorldCup2k23',disabled=True)
+# st.sidebar.write('OR')
+# st.sidebar.text_input(label='Enter the :blue[**Hashtag**...]', placeholder='For eg. #WorldCup2k23',disabled=True )
 
 tweet_button = st.sidebar.button('Analyze Tweets', type='secondary')
 st.sidebar.write('---')
-# file = st.sidebar.file_uploader('Make Sure your file sholud be in csv file and must have columns named as')
-st.sidebar.write('# :orange[Analyze data]')
+st.sidebar.write('# :orange[Analyze data...]')
 file = st.sidebar.file_uploader('Make Predictions on your :blue[**own dataset**?]', type=['csv'])
-# st.session_state.btn = st.sidebar.button('Load your dataset')
 
 def run():
     if st.session_state.username != "":
-        if tweet_button:
             st.sidebar.button('Back to Home', on_click=clear_username)
-            display_window()
-        else:
-            st.write('##### This is a :orange[Twitter Bot account Detection] Model having Machine Learning Capabilites to predicts the chances of a twitter account to be a bot account or not by analyzing various parameters of a tweet done by any user like :orange[common words, phrases] and :orange[sentences] etc.')
-            animation = load_lottiefile("./animations/animation4.json")
-            display_animation(animation)   
+            display_window()  
     
     elif file:
         # st.sidebar.button('Back to Home',type='secondary', on_click=clear_username)

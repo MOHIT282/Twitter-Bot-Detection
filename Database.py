@@ -42,7 +42,7 @@ class DB:
                 # print('data coming from mysql->',df)
                 return df
         except:
-            return None
+            return pd.read_csv(f'datasets/cleaned_data/{UserId}.csv')
 
 
 def FetchData(UserId):

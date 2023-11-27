@@ -121,17 +121,21 @@
 # st.title("BOT-BUSTER")
 
 import streamlit as st 
+import pandas as pd
+# def toggle_form():
+#     st.session_state['form_open'] = False
 
-def toggle_form():
-    st.session_state['form_open'] = False
+# if 'form_open' not in st.session_state:
+#     st.session_state['form_open'] = True
 
-if 'form_open' not in st.session_state:
-    st.session_state['form_open'] = True
-
-# st.session_state.form_open = True
-with st.expander(label='User Form',expanded=st.session_state.form_open):
-    name = st.text_input('Enter the value here')
-    check = st.checkbox("Is user verified")
+# # st.session_state.form_open = True
+# with st.expander(label='User Form',expanded=st.session_state.form_open):
+#     name = st.text_input('Enter the value here')
+#     check = st.checkbox("Is user verified")
     
-button = st.button('submit', on_click=toggle_form)
+# button = st.button('submit', on_click=toggle_form)
     
+file = st.file_uploader('upload file', type=['csv'])
+
+if file:
+    print(pd.read_csv(file))
