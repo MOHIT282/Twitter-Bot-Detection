@@ -211,7 +211,7 @@ def showData(row):
     if df is not None:
         st.write('---')
         st.write(f"### Recent tweets from :blue[{st.session_state.username}]")
-        st.dataframe(data=df[['Tweets','Likes','Comments','Retweets','Tweet_Url']])
+        st.dataframe(data=df[['Tweets','Likes','Comments','Retweets','Tweet_Url']].iloc[1:])
 
 
 # main display that will render after user inputs some value
@@ -261,7 +261,7 @@ def analyze_user_data(file):
         None
     """
     temp_df = pd.read_csv(file)
-    print(temp_df)
+    # print(temp_df)
     if not all(col in temp_df.columns for col in ['UserId','Tweets','Likes','Retweets','Comments','Tweet_Url']):
             st.error("#### csv file must have the following columns :orange[UserId, Tweets, Likes, Retweets, Comments, Tweet_Url]")
     else:
@@ -303,14 +303,14 @@ def analyze_user_data(file):
                 
             show_results(danger_value)
                 
-            st.write(':red[Note:] The predictions accuracy is based on how clean and formated the tweets are')
+            st.write(':red[Note:] The predictions accuracy is based on how clean and formated the tweets are.')
                     
             st.write('---')
             st.write(f'### Common words used by :blue[{name}]')
             display_words(df)
             st.write('---')
             st.write(f'### Recent Tweets of :blue[{name}]')
-            df = st.dataframe(df[['Tweets','Likes','Comments','Retweets','Tweet_Url']])
+            df = st.dataframe(df[['Tweets','Likes','Comments','Retweets','Tweet_Url']].iloc[1:])
 
 
 __,logo, heading,_ = st.columns([1,0.5,2,1])
