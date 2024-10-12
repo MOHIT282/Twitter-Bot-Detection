@@ -3,10 +3,10 @@ import pandas as pd
 class DB:
     def __init__(self):
         self.conn = connector.connect(host='localhost',
-                                    password='MyDatabase24', 
+                                    password='Mohit$282', 
                                     user='root',
                                     port='3306',
-                                    database='twitter_dataset')
+                                    database='twitter_database')
     
     def fetchUserData(self,UserId):
         query = f'select * from twitter_accounts where UserId = "@{UserId}"'
