@@ -14,6 +14,15 @@ import os
 from Tweets import FetchTweets
 from typing import List
 
+if 'username' not in st.session_state:
+    st.session_state.username = ""
+
+if 'form_expand' not in st.session_state:
+    st.session_state.form_expand = True
+        
+if 'file' not in st.session_state:
+    st.session_state.file = None
+
 def close_form():
     st.session_state.form_expand = False
 
@@ -67,7 +76,7 @@ class RenderUI:
         tweet_button = st.sidebar.button('Analyze Tweets', type='secondary')
         st.sidebar.write('---')
         st.sidebar.write('# :orange[Analyze data...]')
-        st.session_state.file = st.sidebar.file_uploader('Make Predictions on your :blue[**own dataset**?]', type=['csv'])
+        st.session_state.file = st.sidebar.file_uploader('Make Predictions on your :blue[**own dataset**?]', type=['csv'],disabled=True)
         
     
     @staticmethod
@@ -355,19 +364,10 @@ class BotPrediction():
                 df = st.dataframe(df[['Tweets','Likes','Comments','Retweets','Tweet_Url']].iloc[1:])
 
 
-
 class MainApp():
 
     def __init__(self) -> None:
         st.set_page_config(page_title=Config.PAGE_TITLE,page_icon=Config.PAGE_ICON)
-        if 'username' not in st.session_state:
-            st.session_state.username = ""
-
-        if 'form_expand' not in st.session_state:
-            st.session_state.form_expand = True
-        
-        if 'file' not in st.session_state:
-            st.session_state.file = None
 
     def run(self):
         RenderUI.showLogo()
@@ -375,7 +375,7 @@ class MainApp():
         if st.session_state.username == "":
             RenderUI.loadMainWindow()
         
-        elif st.session_state.file:
+        elif st.session_state.file != None:
             st.write('file selected')
             BotPrediction.analyzeUserFile(st.session_state.file)
 
