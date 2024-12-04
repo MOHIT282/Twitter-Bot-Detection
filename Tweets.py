@@ -33,7 +33,7 @@ class FetchTweets:
         url = "https://twitter154.p.rapidapi.com/user/tweets"
         querystring = {"username":username,"limit":"100","include_replies":"false","include_pinned":"true"}
         headers = {
-            "x-rapidapi-key": "39c02cdab7msh7424bcdcee10cc5p19b56ajsn06ca92d14230",
+            "x-rapidapi-key": os.getenv('API_KEY'),
             "x-rapidapi-host": "twitter154.p.rapidapi.com"
         }
         response = requests.get(url, headers=headers, params=querystring)
