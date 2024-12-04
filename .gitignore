@@ -1,6 +1,20 @@
+# Environment Variables File
 .env
-Databse.py
+
+# Specific Python Files
+Database.py
 rapid-api.ipynb
-datasets/
-trial_model.ipynb
 app.py
+trial_model.ipynb
+pipeline_models.ipynb
+mode.ipynb
+
+# Entire Datasets Folder
+datasets/
+
+# Additional Python-specific ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
