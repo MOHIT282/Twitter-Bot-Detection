@@ -2,8 +2,10 @@ import requests
 import os
 from dotenv import load_dotenv
 import pandas as pd
+import streamlit as st
 class FetchTweets:
 
+    api_key = st.secrets['API_KEY']
     def __init__(self):
         self.continuation_token = None
         self.df = pd.DataFrame()
@@ -14,7 +16,7 @@ class FetchTweets:
         url = "https://twitter154.p.rapidapi.com/user/details"
         querystring = {"username":username}
         headers = {
-            "x-rapidapi-key": os.getenv('API_KEY'),
+            "x-rapidapi-key": FetchTweets.api_key,
             "x-rapidapi-host": "twitter154.p.rapidapi.com"
         }
         response = requests.get(url, headers=headers, params=querystring)
@@ -31,11 +33,11 @@ class FetchTweets:
         return user_data
 
     def getUserTweets(self, username):
-        
+
         url = "https://twitter154.p.rapidapi.com/user/tweets"
         querystring = {"username":username,"limit":"100","include_replies":"false","include_pinned":"true"}
         headers = {
-            "x-rapidapi-key": os.getenv('API_KEY'),
+            "x-rapidapi-key": FetchTweets.api_key,
             "x-rapidapi-host": "twitter154.p.rapidapi.com"
         }
         response = requests.get(url, headers=headers, params=querystring)
@@ -90,7 +92,7 @@ class FetchTweets:
         url = "https://twitter154.p.rapidapi.com/user/tweets/continuation"
         querystring = {"username":username,"limit":"100","continuation_token":continuation_token,"include_replies":"false"}
         headers = {
-            "x-rapidapi-key": os.getenv('API_KEY'),
+            "x-rapidapi-key": FetchTweets.api_key,
             "x-rapidapi-host": "twitter154.p.rapidapi.com"
         }
         response = requests.get(url, headers=headers, params=querystring)
