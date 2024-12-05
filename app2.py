@@ -32,10 +32,12 @@ class Config:
     PAGE_TITLE = 'Bot-Buster'
     
     # Dynamically resolve paths
-    PAGE_ICON = os.path.join(os.path.dirname(__file__), 'images', 'icon.png')
-    LOGO_PATH = os.path.join(os.path.dirname(__file__), 'images', 'canva-logo.png')
-    ANIMATION_PATH = os.path.join(os.path.dirname(__file__), 'animations', 'animation4.json')
-    MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'custom1_pipe_model.pkl')
+    # Use os.path.abspath to resolve full path
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    PAGE_ICON = os.path.join(BASE_DIR, 'images', 'icon.png')
+    LOGO_PATH = os.path.join(BASE_DIR, 'images', 'canva-logo.png')
+    ANIMATION_PATH = os.path.join(BASE_DIR, 'animations', 'animation4.json')
+    MODEL_PATH = os.path.join(BASE_DIR, 'models', 'custom1_pipe_model.pkl')
 
 class RenderUI:
     @staticmethod
