@@ -11,6 +11,9 @@ mode.ipynb
 
 # Entire Datasets Folder
 datasets/
+images/
+models/
+animations/
 
 # Additional Python-specific ignores
 __pycache__/
