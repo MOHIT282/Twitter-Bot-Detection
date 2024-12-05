@@ -4,8 +4,7 @@ from dotenv import load_dotenv
 import pandas as pd
 class FetchTweets:
 
-    def __init__(self,api):
-        self.api_key = api
+    def __init__(self):
         self.continuation_token = None
         self.df = pd.DataFrame()
         load_dotenv()
@@ -26,10 +25,13 @@ class FetchTweets:
         for key, val in res.items():
             if key in credentials:
                 user_data[key] = val
+            elif key == 'profile_pic_url':
+                user_data['profile_pic'] = val.replace('normal','400x400')
 
         return user_data
 
     def getUserTweets(self, username):
+        
         url = "https://twitter154.p.rapidapi.com/user/tweets"
         querystring = {"username":username,"limit":"100","include_replies":"false","include_pinned":"true"}
         headers = {
@@ -59,7 +61,7 @@ class FetchTweets:
 
         temp = pd.DataFrame(tweets_data)
         self.df = pd.concat([self.df,temp])
-        for i in range(5):
+        for i in range(1):
             res2 = FetchTweets.get_tweets_continued('MrBeast',continuation_token)
             tweets_data = {
             'Tweets' : [],
@@ -81,7 +83,7 @@ class FetchTweets:
             self.df = pd.concat([self.df,temp])
             self.df.reset_index(drop=True)
             continuation_token = res2['continuation_token']
-        return self.df.drop(columns='Timestamp')
+        return self.df.reset_index(drop=True)
     
     @staticmethod
     def get_tweets_continued(username, continuation_token):

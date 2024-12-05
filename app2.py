@@ -6,11 +6,8 @@ import pandas as pd
 import time
 from wordcloud import WordCloud
 from customClass import CustomLinguisticFeatureTransformer
-from phrases import common_words
 import matplotlib.pyplot as plt
 import cleaning
-from dotenv import load_dotenv
-import os
 from Tweets import FetchTweets
 from typing import List
 
@@ -129,9 +126,7 @@ class RenderUI:
 class FetchData:
     
     def __init__(self) -> None:
-        load_dotenv()
-        self.api_key = os.getenv('API_KEY')
-        self.tweet = FetchTweets(api=self.api_key)
+        self.tweet = FetchTweets()
 
     def userDetails(self,username) -> List:
         return self.tweet.getUserDetails(username=username)
@@ -166,14 +161,12 @@ class BotPrediction():
         Outputs:
         - None
         """
-        tweets_list = []
 
         dataset['Tweets'] = dataset['Tweets'].astype('str')
 
-        for i in dataset['Tweets']:
-            tweets_list.append(i)
+        tweets_list = ' '.join(dataset['Tweets'])
 
-        words = common_words(tweets_list)
+        words = tweets_list
 
         wordcloud = WordCloud().generate(words)
         # Display the generated image:
@@ -230,32 +223,34 @@ class BotPrediction():
                 time.sleep(1)
             st.write("")
             
-        col1, col2 = st.columns([1,1.5],gap='large')
+        col1, col2 = st.columns([1,1],gap='medium')
         global danger_value
         danger_value = None
         
         with col1:
-            st.image(dataset.iloc[0, -1],width=300, use_column_width=True)
-            with st.expander(label=f':orange[{dataset.iloc[0, 0]}]', expanded=True):
-                st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' style='text-decoration: none;'>{dataset.iloc[0,1][1:]}</a>", unsafe_allow_html=True)
-                st.write(f"Followers : :blue[{dataset.iloc[0, 2]}]")
-                st.write(f'Verified : :blue[{dataset.iloc[0, -3]}]')
-                st.write(f'Joined Twitter : :blue[{dataset.iloc[0, 4]}]')
+            st.image(dataset['profile_pic'],width=300, use_column_width=True)
+            with st.expander(label=f"### :orange[{dataset['name']}]", expanded=True):
+                st.write(f"Twitter Descrtiption : :blue[{dataset['description']}]")
+                st.write(f"Twitter Handle : <a href='https://www.twitter.com/{st.session_state.username}' style='text-decoration: none;'>{dataset['username']}</a>", unsafe_allow_html=True)
+                st.write(f"Followings : :blue[{dataset['following_count']}]")
+                st.write(f"Followers : :blue[{dataset['follower_count']}]")
+                st.write(f"Verified : :blue[{dataset['is_blue_verified']}]")
+                st.write(f"Joined Twitter : :blue[{dataset['creation_date']}]")
                 
         with col2:
-            danger_value = BotPrediction.predict(dataset)
+            danger_value = BotPrediction.predict(st.session_state.tweets)
             
         BotPrediction.classifyBot(danger_value)
         
         st.write('---')
         st.write(f"### Common words used by :blue[{st.session_state.username}]")
-        BotPrediction.wordCloud(dataset)
+        BotPrediction.wordCloud(st.session_state.tweets)
         
         # print('data reaching at streamlit to load-->',df)------
         if dataset is not None:
             st.write('---')
             st.write(f"### Recent tweets from :blue[{st.session_state.username}]")
-            st.dataframe(data=dataset[['Tweets','Likes','Comments','Retweets','Tweet_Url']].iloc[1:])
+            st.dataframe(data=st.session_state.tweets[['Tweets','Views','Likes','Comments','Retweets','Timestamp']].iloc[1:])
 
     @staticmethod
     def predict(dataset) -> int:
@@ -280,22 +275,28 @@ class BotPrediction():
             time.sleep(2)
             status.update(label="Displaying the Prediction!", state="complete", expanded=False)
 
-                
-        # tweet_file = pd.read_csv(f'./datasets/cleaned_data/{username}.csv')
         model = pickle.load(open(Config.MODEL_PATH,'rb'))
         tweets = dataset['Tweets']
-        tweets = tweets.astype('str')
+        tweets = dataset['Tweets'].astype('str')
         prediction = model.predict(tweets)
         
         output = prediction.tolist()
         
         zeros = output.count(0)
         ones = output.count(1)
-        danger_value = zeros - ones
+        danger_value = (ones//(zeros+ones))*100
             
-        st.write("## Predictions   ")
-        chart_data = pd.DataFrame([[zeros,ones]], columns=["Human", "Bot"])
-        st.bar_chart(chart_data, use_container_width=True)
+        # Create pie chart
+        labels = ['Bot', 'Human']
+        sizes = [zeros, ones]  # Data for pie chart
+        colors = ['lightblue', 'orange']  # Optional color scheme
+
+        fig, ax = plt.subplots()
+        ax.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90, colors=colors)
+        ax.axis('equal')  # Equal aspect ratio ensures the pie is drawn as a circle.
+
+        # Display the pie chart
+        st.pyplot(fig)
         
         return danger_value
 
@@ -375,17 +376,18 @@ class MainApp():
         if st.session_state.username == "":
             RenderUI.loadMainWindow()
         
-        elif st.session_state.file != None:
-            st.write('file selected')
-            BotPrediction.analyzeUserFile(st.session_state.file)
+        # elif st.session_state.file != None:
+        #     st.write('file selected')
+        #     BotPrediction.analyzeUserFile(st.session_state.file)
 
         else:
             RenderUI.loadWaitingWindow()
-            tweets = FetchData()
-            if tweets:
-                data = tweets.userTweets(st.session_state.username)
-                RenderUI.loadPredictionWindow()
-                BotPrediction.showData(data)
+            data = FetchData()
+            userDetails = data.userDetails(st.session_state.username)
+            if len(userDetails) > 1:
+                st.session_state.tweets = data.userTweets(st.session_state.username)
+                data = data.userTweets(st.session_state.username)
+                BotPrediction.showData(userDetails)
             
             else:
                 st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle]')

@@ -163,7 +163,7 @@ def Text_Cleaning(a):
     
     return a
 
-def common_words(tweets_list):
+def cleanedTweets(tweets_list):
      
     ans = []
      

@@ -34,7 +34,7 @@ def clean(df):
     #reading the dataset
     # df = pd.read_csv(file)
         
-    df = df[['UserId','Tweets','Likes','Comments','Retweets','Tweet_Url']]
+    df = df[['UserId','Tweets','Likes','Comments','Retweets']]
     
     # removing null values from the datasets
     df = df.dropna()
