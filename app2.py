@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import cleaning
 from Tweets import FetchTweets
 from typing import List
+import requests
 
 if 'username' not in st.session_state:
     st.session_state.username = ""
@@ -29,13 +30,12 @@ import streamlit as st
 
 class Config:
     """Application configuration and constants"""
+    current_directory = os.getcwd()
     PAGE_TITLE = 'Bot-Buster'
-    
-    # Dynamically resolve paths
-    PAGE_ICON = os.path.join(os.path.dirname(__file__), 'images', 'icon.png')
-    LOGO_PATH = os.path.join(os.path.dirname(__file__), 'images', 'canva-logo.png')
-    ANIMATION_PATH = os.path.join(os.path.dirname(__file__), 'animations', 'animation4.json')
-    MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'custom1_pipe_model.pkl')
+    PAGE_ICON = os.path.join(current_directory, './images/icon.png')
+    LOGO_PATH = os.path.join(current_directory, './images/canva-logo.png')
+    ANIMATION_PATH = os.path.join(current_directory, "./animations/animation4.json")
+    MODEL_PATH = os.path.join(current_directory, './models/custom1_pipe_model.pkl')
 
 class RenderUI:
     @staticmethod
@@ -43,10 +43,10 @@ class RenderUI:
         __,logo, heading,_ = st.columns([1,0.5,2,1])
 
         with logo:
-            st.image('./images/icon.png', width=65)
+            st.image(Config.PAGE_ICON,width=60)
         with heading:
             # st.title(':blue[BOT-BUSTER]')
-            st.image('./images/canva-logo.png', width=360)
+            st.image(Config.LOGO_PATH, width=360)
 
     @staticmethod
     def displayAnimation(animation):
