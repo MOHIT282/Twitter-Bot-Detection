@@ -43,10 +43,10 @@ class RenderUI:
         __,logo, heading,_ = st.columns([1,0.5,2,1])
 
         with logo:
-            st.image('./images/icon.png', width=65)
+            st.image(Config.PAGE_ICON, width=65)
         with heading:
             # st.title(':blue[BOT-BUSTER]')
-            st.image('./images/canva-logo.png', width=360)
+            st.image(Config.LOGO_PATH, width=360)
 
     @staticmethod
     def displayAnimation(animation):
