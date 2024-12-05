@@ -32,10 +32,10 @@ class Config:
     """Application configuration and constants"""
     current_directory = os.getcwd()
     PAGE_TITLE = 'Bot-Buster'
-    PAGE_ICON = os.path.join(current_directory, './images/icon.png')
-    LOGO_PATH = os.path.join(current_directory, './images/canva-logo.png')
-    ANIMATION_PATH = os.path.join(current_directory, "./animations/animation4.json")
-    MODEL_PATH = os.path.join(current_directory, './models/custom1_pipe_model.pkl')
+    PAGE_ICON = os.path.join(current_directory, 'icon.png')
+    LOGO_PATH = os.path.join(current_directory, 'canva-logo.png')
+    ANIMATION_PATH = os.path.join(current_directory, "animation4.json")
+    MODEL_PATH = os.path.join(current_directory, 'custom1_pipe_model.pkl')
 
 class RenderUI:
     @staticmethod
