@@ -25,8 +25,17 @@ if 'file' not in st.session_state:
 def close_form():
     st.session_state.form_expand = False
 
-import os
-import streamlit as st
+
+import nltk
+
+# Specify NLTK data directory
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+nltk.data.path.append(nltk_data_path)
+
+# Download 'punkt' resource if not already present
+if not os.path.exists(os.path.join(nltk_data_path, "tokenizers", "punkt")):
+    nltk.download('punkt', download_dir=nltk_data_path)
+
 
 class Config:
     """Application configuration and constants"""
