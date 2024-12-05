@@ -12,6 +12,9 @@ import cleaning
 from Tweets import FetchTweets
 from typing import List
 import requests
+import nltk
+nltk.download('punkt')
+nltk.download('stopwords')
 
 if 'username' not in st.session_state:
     st.session_state.username = ""
