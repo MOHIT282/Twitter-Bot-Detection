@@ -4,6 +4,7 @@ import json
 import pickle
 import pandas as pd
 import time
+import os
 from wordcloud import WordCloud
 from customClass import CustomLinguisticFeatureTransformer
 import matplotlib.pyplot as plt
@@ -23,13 +24,18 @@ if 'file' not in st.session_state:
 def close_form():
     st.session_state.form_expand = False
 
+import os
+import streamlit as st
+
 class Config:
     """Application configuration and constants"""
     PAGE_TITLE = 'Bot-Buster'
-    PAGE_ICON = './images/icon.png'
-    LOGO_PATH = './images/canva-logo.png'
-    ANIMATION_PATH = "./animations/animation4.json"
-    MODEL_PATH = './models/custom1_pipe_model.pkl'
+    
+    # Dynamically resolve paths
+    PAGE_ICON = os.path.join(os.path.dirname(__file__), 'images', 'icon.png')
+    LOGO_PATH = os.path.join(os.path.dirname(__file__), 'images', 'canva-logo.png')
+    ANIMATION_PATH = os.path.join(os.path.dirname(__file__), 'animations', 'animation4.json')
+    MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'custom1_pipe_model.pkl')
 
 class RenderUI:
     @staticmethod
