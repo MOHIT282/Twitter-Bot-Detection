@@ -1,1 +1,1 @@
-python -c "import nltk; nltk.download('punkt', download_dir='/app/nltk_data')"
+
