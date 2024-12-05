@@ -32,13 +32,11 @@ class Config:
     PAGE_TITLE = 'Bot-Buster'
     
     # Dynamically resolve paths
-    # Use os.path.abspath to resolve full path
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    PAGE_ICON = os.path.join(BASE_DIR, 'images', 'icon.png')
-    LOGO_PATH = os.path.join(BASE_DIR, 'images', 'canva-logo.png')
-    ANIMATION_PATH = os.path.join(BASE_DIR, 'animations', 'animation4.json')
-    MODEL_PATH = os.path.join(BASE_DIR, 'models', 'custom1_pipe_model.pkl')
-
+    # Full paths for Streamlit Cloud
+    PAGE_ICON = '/mount/src/twitter-bot-detection/images/icon.png'
+    LOGO_PATH = '/mount/src/twitter-bot-detection/images/canva-logo.png'
+    ANIMATION_PATH = '/mount/src/twitter-bot-detection/animations/animation4.json'
+    MODEL_PATH = '/mount/src/twitter-bot-detection/models/custom1_pipe_model.pkl'
 class RenderUI:
     @staticmethod
     def showLogo() -> None:
