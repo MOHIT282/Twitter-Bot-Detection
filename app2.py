@@ -12,6 +12,7 @@ import cleaning
 from Tweets import FetchTweets
 from typing import List
 import requests
+import nltk
 
 if 'username' not in st.session_state:
     st.session_state.username = ""
@@ -25,6 +26,7 @@ if 'file' not in st.session_state:
 def close_form():
     st.session_state.form_expand = False
 
+nltk.download('punkt')
 
 class Config:
     """Application configuration and constants"""
