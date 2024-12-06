@@ -34,7 +34,7 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from string import punctuation
 PUNCTUATION = string.punctuation
 
-nltk.download('punkt','stopwords','wordnet')
+nltk.download('punkt','punkt_tab','stopwords','wordnet')
 
 class SegmentFeaturizer:
     def __init__(self):
