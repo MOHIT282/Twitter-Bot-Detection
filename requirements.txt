@@ -9,9 +9,9 @@ requests==2.31.0
 demoji==1.1.0
 python-dotenv==1.0.0
 textblob==0.17.1
-seaborn==0.12.2
-nltk==3.8.1
-spacy==3.7.2
-spacy-language-detection==0.2.0
-xgboost==1.7.6
+seaborn
+nltk
+spacy
+spacy-language-detection
+xgboost
 https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.0/en_core_web_sm-3.7.0-py3-none-any.whl
