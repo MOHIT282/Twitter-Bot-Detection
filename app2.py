@@ -25,8 +25,6 @@ if 'file' not in st.session_state:
 
 def close_form():
     st.session_state.form_expand = False
-
-nltk.download('punkt_tab')  # If `punkt_tab` is required
 nltk.download('punkt')  # Regular Punkt tokenizer
 
 

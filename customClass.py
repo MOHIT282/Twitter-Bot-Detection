@@ -34,7 +34,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from string import punctuation
 PUNCTUATION = string.punctuation
 
-nltk.download('punkt_tab')  # If `punkt_tab` is required
 nltk.download('punkt')  # Regular Punkt tokenizer
 
 
