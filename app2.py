@@ -388,17 +388,18 @@ class MainApp():
         #     BotPrediction.analyzeUserFile(st.session_state.file)
 
         else:
-            RenderUI.loadWaitingWindow()
-            data = FetchData()
-            userDetails = data.userDetails(st.session_state.username)
-            if len(userDetails) > 1:
-                st.session_state.tweets = data.userTweets(st.session_state.username)
-                data = data.userTweets(st.session_state.username)
-                BotPrediction.showData(userDetails)
-            
-            else:
-                st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle]')
-                
+            try:
+                RenderUI.loadWaitingWindow()
+                data = FetchData()
+                userDetails = data.userDetails(st.session_state.username)
+                if len(userDetails) > 1:
+                    st.session_state.tweets = data.userTweets(st.session_state.username)
+                    data = data.userTweets(st.session_state.username)
+                    BotPrediction.showData(userDetails)
+                else:
+                    st.error(body='## :orange[Invalid username] or no details found in the fetched data.\n ## Please recheck the entered :orange[Twitter Handle]')
+            except:
+                st.error(body='# Some error occured in the backened. Please restart the app')
 
 if __name__ == "__main__":
     app = MainApp()
