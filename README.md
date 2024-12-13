@@ -1,6 +1,7 @@
 # Bot-Buster
 
-Experice Twitter-Bot [here](https://twitter-bot-detection.streamlit.app)  
+>Experience Twitter-Bot Detection [here](https://twitter-bot-detection.streamlit.app)
+
 Detecting and Mitigating the Impact of Twitter Bots on Online Discourse
 ‘Bot-Buster’ is a machine learning algorithm which is used to detect and identify Twitter bots. 
 Twitter bot accounts are automated accounts that can perform various actions on Twitter, such as 
